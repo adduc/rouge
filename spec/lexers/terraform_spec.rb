@@ -11,6 +11,14 @@ describe Rouge::Lexers::Terraform do
     assert { tokens.first[0] == Token['Keyword'] }
   end
 
+  it 'lexes heredoc bodies as strings' do
+    tokens = subject.lex("x = <<-EOT\n  a /* b # c\n  EOT\ny = 1\n").to_a
+    assert { tokens.include? [Token['Name.Constant'], 'EOT'] }
+    assert { tokens.include? [Token['Literal.String.Heredoc'], "\n  a /* b # c\n"] }
+    assert { tokens.include? [Token['Name.Constant'], "  EOT\n"] }
+    assert { tokens.none? { |t, _| t.qualname.start_with? 'Comment' } }
+  end
+
   describe 'guessing' do
     include Support::Guessing
 

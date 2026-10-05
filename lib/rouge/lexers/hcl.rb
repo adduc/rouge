@@ -26,8 +26,6 @@ module Rouge
       state :primitives do
         rule %r/[0-9][0-9]*\.[0-9]+([eE][0-9]+)?[fd]?([kKmMgG]b?)?/, Num::Float
         rule %r/[0-9]+([kKmMgG]b?)?/, Num::Integer
-        rule %r/[-+*\/!%&<>|=:?]/, Operator
-
         rule %r/"/, Str::Double, :dq
         rule %r/'/, Str::Single, :sq
         rule %r/(<<-?)(\s*)(\'?)(\\?)(\w+)(\3)/ do |m|
@@ -35,6 +33,9 @@ module Rouge
           @heredocstr = Regexp.escape(m[5])
           push :heredoc
         end
+
+        # must follow the heredoc rule, or `<` swallows `<<EOT`
+        rule %r/[-+*\/!%&<>|=:?]/, Operator
       end
 
       def self.keywords
